@@ -110,6 +110,7 @@ def transposition_decrypt():
     key = int(data.get('key'))
     decrypted_text = transposition_cipher.decrypt(cipher_text, key)
     return jsonify({'decrypted_text': decrypted_text})
+
 #main function
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
