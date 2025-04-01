@@ -2,59 +2,57 @@ import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow, QMessageBox
 from ui.caesar import Ui_MainWindow
 import requests
-
+import os 
+os.environ['Qt_QPA_PLATFORM_PLUGIN_PATH']="../platforms"
 class MyApp(QMainWindow):
     def __init__(self):
         super().__init__()
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
-
-        # Đúng với tên button trong file UI
-        self.ui.pushButton.clicked.connect(self.call_api_encrypt)  # Encrypt
-        self.ui.pushButton_2.clicked.connect(self.call_api_decrypt)  # Decrypt
+        self.ui.btn_encrypt.clicked.connect(self.call_api_encrypt)
+        self.ui.btn_decrypt.clicked.connect(self.call_api_decrypt)
 
     def call_api_encrypt(self):
         url = "http://127.0.0.1:5000/api/caesar/encrypt"
         payload = {
-            "plain_text": self.ui.lineEdit.text(),  # Lấy dữ liệu từ QLineEdit
-            "key": self.ui.lineEdit_2.text()
+            "plain_text": self.ui.txt_plain_text.toPlainText(),
+            "key": self.ui.txt_key.toPlainText()
         }
-
         try:
             response = requests.post(url, json=payload)
             if response.status_code == 200:
                 data = response.json()
-                self.ui.lineEdit_3.setText(data.get("encrypted_message", ""))  # Hiển thị kết quả
-                self.show_message("Encryption Successful", "Encrypted Successfully", QMessageBox.Information)
+                self.ui.txt_cipher_text.setPlainText(data["encrypted_message"])
+
+                msg = QMessageBox()
+                msg.setIcon(QMessageBox.Information)
+                msg.setText("Encrypted Successfully")
+                msg.exec_()
             else:
-                self.show_message("Encryption Error", f"API Error: {response.status_code}", QMessageBox.Warning)
+                print("Error while calling API")
         except requests.exceptions.RequestException as e:
-            self.show_message("Request Failed", str(e), QMessageBox.Critical)
+            print("Error: %s" % e.message)
 
     def call_api_decrypt(self):
         url = "http://127.0.0.1:5000/api/caesar/decrypt"
         payload = {
-            "cipher_text": self.ui.lineEdit_3.text(),  # Lấy dữ liệu từ ô CipherText
-            "key": self.ui.lineEdit_2.text()
+            "cipher_text": self.ui.txt_cipher_text.toPlainText(),
+            "key": self.ui.txt_key.text()
         }
-
         try:
             response = requests.post(url, json=payload)
             if response.status_code == 200:
                 data = response.json()
-                self.ui.lineEdit.setText(data.get("decrypted_message", ""))  # Hiển thị kết quả
-                self.show_message("Decryption Successful", "Decrypted Successfully", QMessageBox.Information)
-            else:
-                self.show_message("Decryption Error", f"API Error: {response.status_code}", QMessageBox.Warning)
-        except requests.exceptions.RequestException as e:
-            self.show_message("Request Failed", str(e), QMessageBox.Critical)
+                self.ui.txt_plain_text.setPlainText(data["decrypted_message"])
 
-    def show_message(self, title, text, icon):
-        msg = QMessageBox(self)
-        msg.setIcon(icon)
-        msg.setWindowTitle(title)
-        msg.setText(text)
-        msg.exec_()
+                msg = QMessageBox()
+                msg.setIcon(QMessageBox.Information)
+                msg.setText("Decrypted Successfully")
+                msg.exec_()
+            else:
+                print("Error while calling API")
+        except requests.exceptions.RequestException as e:
+            print("Error: %s" % e.message)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

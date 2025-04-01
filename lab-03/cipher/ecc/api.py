@@ -1,10 +1,7 @@
 from flask import Flask, request, jsonify
-
-from cipher.ecc import ECCCipher
+from ecc_cipher import ECCCipher
+ 
 app = Flask(__name__)
-
-
-
 
 ecc_cipher = ECCCipher
 @app.route('/api/ecc/generate_keys', methods=['GET'])
@@ -33,8 +30,3 @@ def ecc_verify_signature():
 
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=5000, debug=True)  # Thay 0.0.0.0 thành 127.0.0.1
-# main function
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
-    
-
